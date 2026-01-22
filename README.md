@@ -21,7 +21,7 @@
 ## 📌 Introduction
 
 <div align="center">
-  <img src="docs/fig/RoT_overview.png" alt="Overview of Render-of-Thought" width="80%">
+  <img src="docs/static/images/overview.png" alt="Overview of Render-of-Thought" width="80%">
 </div>
 
 This repository hosts the official implementation of **Render-of-Thought (RoT)**, a novel framework that compresses textual Chain-of-Thought (CoT) reasoning by rendering it into images and leveraging visual latent spaces for efficient reasoning.
