@@ -1,0 +1,91 @@
+data:
+  dataset_name: "gsm8kaug"
+  processed_dir: "data/GSM8k-Aug-NL"
+  cache_dir: "data/cache"
+  
+  train_split: "train"
+  test_split: "test"
+  
+  save_rendered_images: false
+  rendered_images_dir: "data/rendered_images"
+  max_save_images: 100
+
+rendering:
+  image_size: 512
+  font_size: 16
+  background_color: "white"
+  text_color: "black"
+  padding: 40
+  line_spacing: 8
+
+ocr_model:
+  model_path: "DeepSeek-OCR/ocr_model"
+  device: "cuda"
+  dtype: "bfloat16"
+
+llm_model:
+  use_custom_llm: true
+  model_path: "ckpt/base/Qwen3-VL-4B-Instruct"
+  device: "cuda"
+  dtype: "bfloat16"
+
+training:
+  batch_size: 16
+  num_epochs: 2
+  learning_rate: 2e-5
+  warmup_steps: 20
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+  
+  fp16: false
+  bf16: true
+  dataloader_pin_memory: true
+  dataloader_num_workers: 4
+  
+  use_projection_head: true          
+  projection_hidden_dim: 2048
+  freeze_vision: true                
+  
+  enable_lora: true                  
+  lora_r: 16                         
+  lora_alpha: 32                     
+  lora_dropout: 0.05                 
+  lora_target_modules:               
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+  
+  stage2_mode: true                  
+  train_lm_head_only: false          
+  freeze_projection_head: true       
+  
+  include_img_end_loss: true       
+  include_answer_loss: true         
+  include_vision_loss: true         
+
+  use_uncertainty_weighting: false
+  loss_type: "mse_only"
+  loss_weights:
+    vision_loss_weight: 0.0         
+    lm_loss_weight: 1.0              
+
+deepspeed:
+  config_file: "configs/deepspeed_config.json"
+  zero_optimization:
+    stage: 2
+    cpu_offload: false
+  activation_checkpointing: true
+
+logging:
+  log_dir: "output/logs/stage2"
+  log_interval: 5
+  save_interval: 200
+  checkpoint_dir: "output/checkpoints/stage2"
+  keep_last_n_checkpoints: 3
+  
+  stage1_checkpoint: "output/checkpoints/stage1/checkpoint_epoch_2"
+
+misc:
+  seed: 42
+  num_workers: 4
