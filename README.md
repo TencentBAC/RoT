@@ -9,11 +9,18 @@
   <a href='https://github.com/TencentBAC/RoT'><img src='https://img.shields.io/badge/Code-GitHub-181717?logo=github'></a>
 </div>
 
+<br>
+
 <p align="center">
   <b>Yifan Wang<sup>1,2</sup>, Shiyu Li<sup>1</sup>, Peiming Li<sup>1,3</sup>, Xiaochen Yang<sup>4</sup>, Yang Tang<sup>1,†,‡</sup>, Zheng Wei<sup>1,†</sup></b><br>
+  <br>
   <sup>1</sup>Tencent BAC &nbsp;&nbsp; <sup>2</sup>Tsinghua University &nbsp;&nbsp; <sup>3</sup>Peking University &nbsp;&nbsp; <sup>4</sup>University of Glasgow<br>
+  <br>
   <sup>†</sup>Corresponding Authors &nbsp;&nbsp; <sup>‡</sup>Project Lead<br>
+  <br>
   <i>📧 {ethanntang, hemingwei}@tencent.com</i>
+  <br>
+  <br>
 </p>
 
 ---
