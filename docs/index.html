@@ -1,366 +1,784 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Render-of-Thought: Rendering Textual Chain-of-Thought as Images for Visual Latent Reasoning</title>
+    <meta charset="utf-8">
+    <!-- Meta tags for social media banners -->
+    <meta name="description"
+        content="Render-of-Thought: Rendering Textual Chain-of-Thought as Images for Visual Latent Reasoning">
+    <meta property="og:title" content="Render-of-Thought: Visual Latent Reasoning" />
+    <meta property="og:description"
+        content="The first framework to reify the reasoning chain by rendering textual steps into images, achieving 3-4× token compression with competitive accuracy." />
+    <meta property="og:url" content="https://tencentbac.github.io/RoT/" />
+    <meta property="og:image" content="static/images/overview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:title" content="Render-of-Thought: Visual Latent Reasoning">
+    <meta name="twitter:description"
+        content="The first framework to reify the reasoning chain by rendering textual steps into images for visual latent reasoning.">
+    <meta name="twitter:image" content="static/images/overview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="keywords" content="Chain-of-Thought, visual reasoning, latent reasoning, VLM, LLM, token compression">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Render-of-Thought</title>
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #a855f7;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
+            font-family: 'Noto Sans', sans-serif;
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+        .hero-body {
+            padding: 3rem 1.5rem;
         }
-        
-        header {
-            text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-bottom: 40px;
-        }
-        
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
+
+        .publication-title {
+            font-family: 'Google Sans', sans-serif;
             font-weight: 700;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        
-        .authors {
-            font-size: 1.1em;
-            margin: 15px 0;
-            font-style: italic;
+
+        .publication-authors {
+            font-family: 'Google Sans', sans-serif;
         }
-        
-        .affiliations {
-            font-size: 0.95em;
-            margin: 10px 0;
-            opacity: 0.9;
-        }
-        
-        .badges {
-            margin: 30px 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .badge {
+
+        .author-block {
             display: inline-block;
-            padding: 8px 16px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            text-decoration: none;
-            color: white;
-            font-weight: 500;
-            transition: background-color 0.3s;
         }
-        
-        .badge:hover {
-            background-color: rgba(255, 255, 255, 0.3);
+
+        .link-block a {
+            margin: 5px;
         }
-        
-        section {
-            margin: 40px 0;
-            padding: 30px;
-            background-color: #fafafa;
-            border-radius: 8px;
+
+        .button.is-dark {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            transition: all 0.3s ease;
         }
-        
-        h2 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
+
+        .button.is-dark:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
-        
-        h3 {
-            color: #764ba2;
-            font-size: 1.5em;
-            margin: 25px 0 15px 0;
+
+        section.hero.is-light {
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
         }
-        
-        .abstract {
-            background-color: #e8f4f8;
-            padding: 25px;
-            border-left: 5px solid #667eea;
-            margin: 20px 0;
-            border-radius: 5px;
+
+        .hero.is-small .hero-body {
+            padding: 2rem 1.5rem;
         }
-        
-        .figure {
-            text-align: center;
-            margin: 30px 0;
+
+        .section {
+            padding: 3rem 1.5rem;
         }
-        
-        .figure img,
-        .figure embed,
-        .figure object {
+
+        .content h2.title {
+            font-family: 'Google Sans', sans-serif;
+            color: var(--primary-color);
+        }
+
+        .content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            border: 1px solid #e2e8f0;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .feature-card h4 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .figure-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin: 2rem 0;
+        }
+
+        .figure-container img {
             max-width: 100%;
             height: auto;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
-        .figure embed,
-        .figure object {
-            min-height: 400px;
-            width: 100%;
-        }
-        
+
         .figure-caption {
-            margin-top: 15px;
+            margin-top: 1rem;
             font-style: italic;
-            color: #666;
-            font-size: 0.95em;
+            color: #64748b;
+            text-align: center;
         }
-        
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
+
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
         }
-        
-        .feature-card {
-            background: white;
-            padding: 20px;
+
+        table.results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        table.results-table th {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        table.results-table td {
+            padding: 10px 16px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        table.results-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .best-result {
+            background-color: #dcfce7 !important;
+            font-weight: 600;
+        }
+
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        
-        .feature-card h4 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        ul {
-            margin: 15px 0;
-            padding-left: 30px;
-        }
-        
-        li {
-            margin: 8px 0;
-        }
-        
-        .citation {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            margin: 20px 0;
             overflow-x: auto;
         }
-        
-        footer {
-            text-align: center;
-            padding: 30px;
-            margin-top: 40px;
-            border-top: 2px solid #eee;
-            color: #666;
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
         }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8em;
+
+        .method-step {
+            display: flex;
+            align-items: flex-start;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .method-step .step-number {
+            background: var(--bg-gradient);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .formula-box {
+            background: #fafafa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 2rem;
+        }
+
+        footer a {
+            color: #a5b4fc;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        .icon-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .publication-title {
+                font-size: 1.5rem !important;
             }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            section {
-                padding: 20px;
+
+            .hero-body {
+                padding: 2rem 1rem;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>Render-of-Thought: Rendering Textual Chain-of-Thought as Images for Visual Latent Reasoning</h1>
-            <div class="authors">
-                Yifan Wang, Shiyu Li, Peiming Li, Xiaochen Yang, Yang Tang, Zheng Wei
-            </div>
-            <div class="affiliations">
-                Basic Algorithm Center, PCG, Tencent
-            </div>
-            <div class="badges">
-                <a href="https://arxiv.org/abs/2601.14750" class="badge">📄 Paper</a>
-                <a href="https://github.com/TencentBAC/RoT" class="badge">💻 Code</a>
-                <a href="https://huggingface.co/TencentBAC/RoT" class="badge">🤗 Models</a>
-            </div>
-        </header>
 
-        <section id="abstract">
-            <h2>Abstract</h2>
-            <div class="abstract">
-                <p>
-                    Render-of-Thought (RoT) introduces a paradigm shift in latent reasoning by visualizing the reasoning chain. 
-                    Instead of compressing Chain-of-Thought (CoT) into opaque vectors, RoT renders textual reasoning steps into images 
-                    and uses pre-trained vision encoders as semantic anchors to guide the reasoning process. This approach achieves:
-                </p>
-                <ul>
-                    <li><strong>3-4× token compression</strong> compared to explicit CoT</li>
-                    <li><strong>Significant inference acceleration</strong> while maintaining competitive accuracy</li>
-                    <li><strong>Interpretable reasoning</strong> through visual representations</li>
-                    <li><strong>Plug-and-play implementation</strong> without additional pre-training overhead</li>
-                </ul>
-            </div>
-        </section>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-body">
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column has-text-centered">
+                        <h1 class="title is-2 publication-title">
+                            Render-of-Thought: Rendering Textual Chain-of-Thought as Images for Visual Latent Reasoning
+                        </h1>
 
-        <section id="overview">
-            <h2>Overview</h2>
-            <div class="figure">
-                <embed src="fig/overview.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 1:</strong> Overview of the Render-of-Thought framework. 
-                    (a) Rendering Method transforms textual reasoning steps into compact single-line images. 
-                    (b) Latent Reasoning Method aligns LLM-generated hidden states with visual features via a projection head, 
-                    enabling the model to perform continuous reasoning within the visual latent space.
+                        <div class="is-size-5 publication-authors" style="margin-top: 1.5rem;">
+                            <span class="author-block">Yifan Wang<sup>1,2</sup>,</span>
+                            <span class="author-block">Shiyu Li<sup>1</sup>,</span>
+                            <span class="author-block">Peiming Li<sup>1,3</sup>,</span>
+                            <span class="author-block">Xiaochen Yang<sup>4</sup>,</span>
+                            <span class="author-block">Yang Tang<sup>1*†</sup>,</span>
+                            <span class="author-block">Zheng Wei<sup>1*</sup></span>
+                        </div>
+
+                        <div class="is-size-6 publication-authors" style="margin-top: 1rem; color: #64748b;">
+                            <span class="author-block"><sup>1</sup>Tencent BAC</span>&nbsp;&nbsp;
+                            <span class="author-block"><sup>2</sup>Tsinghua University</span>&nbsp;&nbsp;
+                            <span class="author-block"><sup>3</sup>Peking University</span>&nbsp;&nbsp;
+                            <span class="author-block"><sup>4</sup>University of Glasgow</span>
+                            <br>
+                            <span style="font-size: 0.9rem;"><sup>*</sup>Corresponding authors, <sup>†</sup>Project
+                                Lead</span>
+                            <br>
+                            <span style="font-size: 0.9rem; font-family: monospace;">{ethanntang,
+                                hemingwei}@tencent.com</span>
+                        </div>
+
+                        <!-- Links -->
+                        <div class="link-block" style="margin-top: 2rem;">
+                            <a href="https://arxiv.org/abs/2601.14750" target="_blank"
+                                class="external-link button is-normal is-rounded is-dark">
+                                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                                <span>Paper</span>
+                            </a>
+                            <a href="https://github.com/TencentBAC/RoT" target="_blank"
+                                class="external-link button is-normal is-rounded is-dark">
+                                <span class="icon"><i class="fab fa-github"></i></span>
+                                <span>Code</span>
+                            </a>
+                            <a href="https://huggingface.co/TencentBAC/RoT" target="_blank"
+                                class="external-link button is-normal is-rounded is-dark">
+                                <span class="icon">🤗</span>
+                                <span>Models</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="introduction">
-            <h2>Introduction</h2>
-            <div class="figure">
-                <embed src="fig/introduction.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 2:</strong> Introduction and motivation for Render-of-Thought.
+    <!-- Abstract -->
+    <section class="section hero is-light">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-four-fifths">
+                    <h2 class="title is-3">📄 Abstract</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            Chain-of-Thought (CoT) prompting has achieved remarkable success in unlocking the reasoning
+                            capabilities of Large Language Models (LLMs). Although CoT prompting enhances reasoning, its
+                            verbosity imposes substantial computational overhead. Recent works often focus exclusively
+                            on outcome alignment and lack supervision on the intermediate reasoning process, obscuring
+                            the analyzability of the latent reasoning chain.
+                        </p>
+                        <p>
+                            To address these challenges, we introduce <b style="color:#6366f1;">Render-of-Thought
+                                (RoT)</b>, the first framework to reify the reasoning chain by rendering textual steps
+                            into images, making the latent rationale explicit and traceable. We leverage the vision
+                            encoders of existing Vision Language Models (VLMs) as <b style="color:#6366f1;">semantic
+                                anchors</b> to align the vision embeddings with the textual space. This design ensures
+                            <b style="color:#6366f1;">plug-and-play</b> implementation without incurring additional
+                            pre-training overhead.
+                        </p>
+                        <div class="highlight-box">
+                            <p style="margin: 0;">
+                                <strong>🎯 Key Results:</strong> Extensive experiments demonstrate that our method
+                                achieves <b>3-4× token compression</b> and <b>substantial inference acceleration</b>
+                                compared to explicit CoT, while maintaining competitive performance against other
+                                methods.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="method">
-            <h2>Method</h2>
-            <h3>Key Features</h3>
-            <div class="features">
-                <div class="feature-card">
-                    <h4>🎨 Text-to-Image Rendering</h4>
-                    <p>Converts textual CoT steps into compact single-line images with dynamic width and fixed height.</p>
-                </div>
-                <div class="feature-card">
-                    <h4>🔗 Visual-Semantic Alignment</h4>
-                    <p>Aligns LLM hidden states with visual embeddings via a projection head, using pre-trained vision encoders as semantic anchors.</p>
-                </div>
-                <div class="feature-card">
-                    <h4>🚀 Two-Stage Training</h4>
-                    <p>Stage 1: Train projection head to align latent representations. Stage 2: Fine-tune language model head.</p>
+    <!-- Overview -->
+    <section class="section" id="Overview">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">🌟 Overview</h2>
+
+                    <div class="columns is-multiline is-centered" style="margin-top: 2rem;">
+                        <div class="column is-6">
+                            <div class="feature-card">
+                                <h4><i class="fas fa-image"></i> Render-of-Thought</h4>
+                                <p>First framework to render textual Chain-of-Thought steps into compact single-line
+                                    images for latent reasoning.</p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="feature-card">
+                                <h4><i class="fas fa-anchor"></i> Semantic Anchors</h4>
+                                <p>Leverages frozen vision encoders from VLMs as semantic anchors, ensuring robust
+                                    alignment without additional pre-training.</p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="feature-card">
+                                <h4><i class="fas fa-compress-arrows-alt"></i> 3-4× Compression</h4>
+                                <p>Achieves significant token compression by encoding verbose textual reasoning into
+                                    compact visual latent representations.</p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="feature-card">
+                                <h4><i class="fas fa-tachometer-alt"></i> Fast Inference</h4>
+                                <p>Achieves 3.7× speedup on GSM8K-Aug and 4.6× on GSM-Hard compared with explicit CoT.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <h3>Training Pipeline</h3>
-            <div class="figure">
-                <embed src="fig/training_stage.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 3:</strong> Two-stage training pipeline of Render-of-Thought.
+    <!-- Introduction Figure -->
+    <section class="section hero is-light" id="Introduction">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">💡 Motivation</h2>
+                    <div class="figure-container">
+                        <img src="static/images/introduction.png" alt="Introduction and Motivation">
+                        <p class="figure-caption">
+                            <strong>Figure 1:</strong> Comparison of Reasoning Paradigms. (a) Explicit CoT relies on
+                            verbose textual generation. (b) Implicit CoT compresses reasoning into latent space. (c)
+                            <strong>Render-of-Thought</strong> utilizes visual rendering as semantic anchors to
+                            structure the latent reasoning process.
+                        </p>
+                    </div>
+                    <div class="content has-text-justified" style="margin-top: 2rem;">
+                        <p>
+                            While Chain-of-Thought enhances reasoning capabilities, its verbosity leads to prolonged
+                            inference latency and excessive memory consumption. Prior latent reasoning methods often
+                            compress thoughts into opaque vectors without explicit constraints, obscuring the
+                            analyzability of the reasoning chain.
+                        </p>
+                        <p>
+                            <b style="color:#6366f1;">Render-of-Thought</b> proposes a paradigm shift by <em>visualizing
+                                the reasoning chain</em>. By rendering textual steps into images, we leverage the high
+                            information density of visual modalities while keeping the rationale explicit and traceable.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="results">
-            <h2>Experimental Results</h2>
-            
-            <h3>Performance on Mathematical Reasoning</h3>
-            <div class="figure">
-                <img src="fig/math.png" alt="Mathematical Reasoning Results" onerror="this.style.display='none'">
-                <div class="figure-caption">
-                    <strong>Figure 4:</strong> Performance comparison on mathematical reasoning benchmarks.
+    <!-- Method -->
+    <section class="section" id="Method">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">🔬 Method</h2>
+
+                    <div class="figure-container">
+                        <img src="static/images/overview.png" alt="Overview of Render-of-Thought">
+                        <p class="figure-caption">
+                            <strong>Figure 2:</strong> Overview of Render-of-Thought. (a) Rendering Method transforms
+                            textual reasoning steps into compact single-line images. (b) Latent Reasoning Method aligns
+                            LLM-generated hidden states with visual features via a projection head.
+                        </p>
+                    </div>
+
+                    <div class="content has-text-justified" style="margin-top: 2rem;">
+                        <h3 style="color: #6366f1;"><i class="fas fa-paint-brush"></i> CoT Rendering</h3>
+                        <p>
+                            The rendering module transforms text into <strong>single-line images</strong> with dynamic
+                            width and fixed 32 px height. By using a 20 px font and 4 px padding with black text on a
+                            white background, this layout ensures image patches are extracted left-to-right, naturally
+                            aligning the visual sequence with text order.
+                        </p>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <h3>GSM8K-Aug Results</h3>
-            <div class="figure">
-                <img src="fig/gsm8k-aug.png" alt="GSM8K-Aug Results" onerror="this.style.display='none'">
-                <div class="figure-caption">
-                    <strong>Figure 5:</strong> Results on GSM8K-Aug dataset.
+    <!-- Two-Stage Training -->
+    <section class="section hero is-light" id="Training">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">📚 Two-Stage Training Framework</h2>
+
+                    <div class="figure-container">
+                        <img src="static/images/training_stage.png" alt="Two-Stage Training Pipeline">
+                        <p class="figure-caption">
+                            <strong>Figure 3:</strong> Two-stage training pipeline. Stage I optimizes the projection
+                            head for visual alignment. Stage II fine-tunes the LLM for autoregressive latent reasoning.
+                        </p>
+                    </div>
+
+                    <div class="content has-text-justified" style="margin-top: 2rem;">
+                        <div class="method-step">
+                            <div class="step-number">1</div>
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0; color: #6366f1;">Stage I: Visual Alignment</h4>
+                                <p style="margin: 0;">
+                                    Freeze both LLM Backbone and Vision Encoder. Train only the Visual Projection Head
+                                    to map LLM hidden states to visual embeddings using MSE loss.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="method-step">
+                            <div class="step-number">2</div>
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0; color: #6366f1;">Stage II: Latent Supervised
+                                    Fine-Tuning</h4>
+                                <p style="margin: 0;">
+                                    Freeze Vision Encoder and Projection Head. Fine-tune LLM backbone with LoRA to
+                                    generate visual reasoning trajectories followed by the final answer. The model
+                                    learns to navigate the continuous latent space toward accurate solutions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <h3>Inference Time</h3>
-            <div class="figure">
-                <embed src="fig/infer_time.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 6:</strong> Inference time comparison with baseline methods.
+    <!-- Experiments -->
+    <section class="section" id="Experiments">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">📊 Experiments</h2>
+
+                    <div class="content has-text-justified">
+                        <h3 style="color: #6366f1;">Main Results on Grade-School Reasoning</h3>
+                        <p>
+                            We evaluate Render-of-Thought across four mathematical reasoning datasets using three VLM
+                            architectures:
+                        </p>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>GSM8k-Aug</th>
+                                    <th>GSM-Hard</th>
+                                    <th>SVAMP</th>
+                                    <th>MultiArith</th>
+                                    <th>Avg Pass@1</th>
+                                    <th>Avg #L</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" style="background: #f1f5f9; font-weight: 600;">Qwen3-VL-4B-Instruct
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>SFT-w/o CoT</td>
+                                    <td>26.2</td>
+                                    <td>9.48</td>
+                                    <td>70.0</td>
+                                    <td>85.6</td>
+                                    <td>47.8</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td>SFT-CoT</td>
+                                    <td>81.2</td>
+                                    <td>53.4</td>
+                                    <td>84.3</td>
+                                    <td>98.3</td>
+                                    <td>79.3</td>
+                                    <td>108.4</td>
+                                </tr>
+                                <tr class="best-result">
+                                    <td><strong>RoT (Ours)</strong></td>
+                                    <td><strong>37.8</strong></td>
+                                    <td><strong>14.1</strong></td>
+                                    <td><strong>72.7</strong></td>
+                                    <td><strong>97.2</strong></td>
+                                    <td><strong>55.4</strong></td>
+                                    <td><strong>32.0</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="highlight-box" style="text-align: left;">
+                        <p style="margin: 0;">
+                            <strong>💡 Key Insight:</strong> On MultiArith, RoT achieves <strong>97.2% accuracy</strong>
+                            with only <strong>32 tokens</strong>, nearly matching explicit CoT (98.3%) while using
+                            <strong>3.4× fewer tokens</strong>.
+                        </p>
+                    </div>
+
+                    <div class="content has-text-justified" style="margin-top: 2rem;">
+                        <h3 style="color: #6366f1;">Comparison with LLM-based Latent Reasoning Methods</h3>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Base Model</th>
+                                    <th>GSM8k-Aug</th>
+                                    <th>GSM-Hard</th>
+                                    <th>SVAMP</th>
+                                    <th>MultiArith</th>
+                                    <th>Average</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>iCoT</td>
+                                    <td>Qwen3-4B</td>
+                                    <td>13.5</td>
+                                    <td>4.09</td>
+                                    <td>36.9</td>
+                                    <td>49.2</td>
+                                    <td>25.9</td>
+                                </tr>
+                                <tr>
+                                    <td>Coconut</td>
+                                    <td>Qwen3-4B</td>
+                                    <td>16.9</td>
+                                    <td>5.42</td>
+                                    <td>43.6</td>
+                                    <td>60.3</td>
+                                    <td>31.6</td>
+                                </tr>
+                                <tr>
+                                    <td>CODI</td>
+                                    <td>Qwen3-4B</td>
+                                    <td>7.28</td>
+                                    <td>2.20</td>
+                                    <td>11.0</td>
+                                    <td>18.3</td>
+                                    <td>9.70</td>
+                                </tr>
+                                <tr>
+                                    <td>CoLaR-2</td>
+                                    <td>Qwen3-4B</td>
+                                    <td>40.0</td>
+                                    <td>9.17</td>
+                                    <td>57.7</td>
+                                    <td>82.2</td>
+                                    <td>47.3</td>
+                                </tr>
+                                <tr class="best-result">
+                                    <td><strong>RoT (Ours)</strong></td>
+                                    <td>Qwen3-VL-4B</td>
+                                    <td><strong>37.8</strong></td>
+                                    <td><strong>14.1</strong></td>
+                                    <td><strong>72.7</strong></td>
+                                    <td><strong>97.2</strong></td>
+                                    <td><strong>55.4</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="content has-text-justified" style="margin-top: 2rem;">
+                        <p>
+                            <strong>RoT outperforms the best LLM-based method (CoLaR-2) by 8.1%</strong> in average
+                            accuracy. While CoLaR-2 shows slightly higher accuracy on GSM8k-Aug, RoT demonstrates
+                            superior robustness in out-of-domain generalization, benefiting from the rich semantic
+                            representations provided by pre-trained visual encoders.
+                        </p>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <h3>Loss Curves</h3>
-            <div class="figure">
-                <embed src="fig/loss_curve.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 7:</strong> Training loss curves for Stage 1 and Stage 2.
+    <!-- Inference Time -->
+    <section class="section hero is-light" id="Efficiency">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">⚡ Inference Efficiency</h2>
+
+                    <div class="figure-container">
+                        <img src="static/images/infer_time.png" alt="Inference Time Comparison">
+                        <p class="figure-caption">
+                            <strong>Figure 4:</strong> Inference time comparison (seconds per sample) on GSM8k-Aug and
+                            GSM-Hard datasets using single NVIDIA H20 GPU.
+                        </p>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <h3>Decoding Strategies</h3>
-            <div class="figure">
-                <embed src="fig/decoding_strategies.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 8:</strong> Comparison of different decoding strategies.
+    <!-- Visualization -->
+    <section class="section" id="Visualization">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">🔍 Visualization & Analysis</h2>
+
+                    <div class="figure-container">
+                        <img src="static/images/vis_case.png" alt="Visualization of Latent Visual Tokens">
+                        <p class="figure-caption">
+                            <strong>Figure 5:</strong> Characterizations of Latent Visual Tokens. We present a case from
+                            the MATH dataset showing (a) Vision Embeddings Heatmap, (b) Token Similarity Matrix, and (c)
+                            Statistical Properties, demonstrating structured semantic encoding within the continuous
+                            visual latent space.
+                        </p>
+                    </div>
+
+                    <div class="content has-text-justified" style="margin-top: 2rem;">
+                        <p>
+                            We observed an interesting phenomenon: <strong>output tokens tend to become increasingly
+                                homogeneous</strong> after a certain position. The values in the token similarity matrix
+                            approach 1.0, feature activation heatmaps become nearly identical, and statistical
+                            properties stabilize.
+                        </p>
+                        <p>
+                            This suggests that the model effectively encodes core reasoning logic in the initial phase,
+                            after which the latent states enter a <em>saturation plateau</em>. These subsequent
+                            high-similarity tokens likely serve to maintain semantic context for decoding the final
+                            answer, rather than introducing new reasoning steps.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="visualization">
-            <h2>Visualization Examples</h2>
-            <div class="figure">
-                <embed src="fig/vis_case.pdf" type="application/pdf" width="100%" height="600px">
-                <div class="figure-caption">
-                    <strong>Figure 9:</strong> Visualization examples of rendered reasoning chains.
+    <!-- Outlook -->
+    <section class="section" id="Outlook">
+        <div class="container is-max-desktop content">
+            <div class="columns is-centered has-text-centered">
+                <div class="column is-five-fifths">
+                    <h2 class="title is-3">🚀 Outlook</h2>
+                    <div class="content has-text-justified">
+                        <p>
+                            While Render-of-Thought demonstrates promising results in mathematical and logical
+                            reasoning, we envision several exciting directions for future research:
+                        </p>
+                        <ul>
+                            <li><strong>Broadening Reasoning Domains:</strong> Extending the visual latent reasoning
+                                paradigm to other complex domains such as commonsense reasoning, causal inference, and
+                                multilingual settings.</li>
+                            <li><strong>Adaptive Token Budgets:</strong> Developing mechanisms to dynamically adjust the
+                                latent reasoning length based on problem difficulty, further optimizing the balance
+                                between accuracy and efficiency.</li>
+                            <li><strong>Advanced Rendering & Caching:</strong> Investigating more efficient
+                                text-to-image rendering strategies and caching mechanisms to further reduce training
+                                overhead for large-scale deployments.</li>
+                            <li><strong>Optimizing Dynamic Termination:</strong> Improving the stability of
+                                self-regulated stopping in continuous latent spaces to move beyond fixed token budgets.
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="failure">
-            <h2>Failure Case Analysis</h2>
-            <div class="figure">
-                <img src="fig/failure_case.png" alt="Failure Cases" onerror="this.style.display='none'">
-                <div class="figure-caption">
-                    <strong>Figure 10:</strong> Analysis of failure cases and error patterns.
-                </div>
-            </div>
-        </section>
+    <!-- MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-        <section id="citation">
-            <h2>Citation</h2>
-            <div class="citation">
-@article{wang2026rot,
+    <!-- BibTeX -->
+    <section class="section hero is-light" id="BibTeX">
+        <div class="container is-max-desktop content">
+            <h2 class="title is-3 has-text-centered">📚 Citation</h2>
+            <pre><code>@article{wang2026rot,
   title={Render-of-Thought: Rendering Textual Chain-of-Thought as Images for Visual Latent Reasoning},
-  author={Yifan Wang and Shiyu Li and Peiming Li and Xiaochen Yang and Yang Tang and Zheng Wei},
+  author={Wang, Yifan and Li, Shiyu Li, Peiming Li, Xiaochen Yang, Yang Tang, Zheng Wei},
   journal={arXiv preprint arXiv:2601.14750},
   year={2026}
-}
-            </div>
-        </section>
+}</code></pre>
+        </div>
+    </section>
 
-        <footer>
-            <p>This page was built using the Academic Project Page Template. The source code is available on <a href="https://github.com/TencentBAC/RoT">GitHub</a>.</p>
-            <p style="margin-top: 10px;">© 2026 Render-of-Thought. All rights reserved.</p>
-        </footer>
-    </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="columns is-centered">
+                <div class="column is-8">
+                    <div class="content has-text-centered">
+                        <p>
+                            This page was built using the <a
+                                href="https://github.com/eliahuhorwitz/Academic-project-page-template"
+                                target="_blank">Academic Project Page Template</a>.
+                        </p>
+                        <p>
+                            © 2026 Render-of-Thought | <a href="https://github.com/TencentBAC/RoT"
+                                target="_blank">GitHub</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
 </body>
+
 </html>

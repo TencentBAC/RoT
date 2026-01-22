@@ -10,8 +10,10 @@
 </div>
 
 <p align="center">
-  <i><b>Yifan Wang, Shiyu Li, Peiming Li, Xiaochen Yang, Yang Tang, Zheng Wei</b></i><br>
-  <i>Basic Algorithm Center, PCG, Tencent</i>
+  <b>Yifan Wang<sup>1,2</sup>, Shiyu Li<sup>1</sup>, Peiming Li<sup>1,3</sup>, Xiaochen Yang<sup>4</sup>, Yang Tang<sup>1,†,‡</sup>, Zheng Wei<sup>1,†</sup></b><br>
+  <sup>1</sup>Tencent BAC &nbsp;&nbsp; <sup>2</sup>Tsinghua University &nbsp;&nbsp; <sup>3</sup>Peking University &nbsp;&nbsp; <sup>4</sup>University of Glasgow<br>
+  <sup>†</sup>Corresponding Authors &nbsp;&nbsp; <sup>‡</sup>Project Lead<br>
+  <i>📧 {ethanntang, hemingwei}@tencent.com</i>
 </p>
 
 ---
@@ -32,15 +34,6 @@ This repository hosts the official implementation of **Render-of-Thought (RoT)**
 - **Plug-and-play implementation** without additional pre-training overhead
 
 The key innovation lies in transforming intermediate reasoning paths into compact visual representations using a pre-trained vision encoder. During training, the framework aligns LLM-generated hidden states with visual features via a projection head, enabling the model to perform continuous reasoning within the visual latent space. At inference time, rendering and visual encoding are eliminated, requiring only a forward pass through the trained LLM backbone and visual projection head.
-
-## Overview
-
-Render-of-Thought introduces a paradigm shift in latent reasoning by visualizing the reasoning chain. Instead of compressing CoT into opaque vectors, RoT renders textual reasoning steps into images and uses pre-trained vision encoders as semantic anchors to guide the reasoning process. This approach achieves:
-
-- **3-4× token compression** compared to explicit CoT
-- **Significant inference acceleration** while maintaining competitive accuracy
-- **Interpretable reasoning** through visual representations
-- **Plug-and-play implementation** without additional pre-training overhead
 
 ## Key Features
 
@@ -93,7 +86,7 @@ Each data sample should be in JSONL format with the following structure:
   "answer": "Final answer"
 }
 ```
-An example dataset format is provided in the ``data/GSM8k-Aug-NL``  directoryfor reference.
+An example dataset format is provided in the `data/GSM8k-Aug-NL` directory for reference.
 
 ## Training
 
@@ -132,7 +125,7 @@ bash run_train_stage1.sh \
 - Freezes the entire language model
 - Only trains the projection head
 - Uses vision loss and language modeling loss
-- Checkpoints are saved to `outputs/checkpoints/stage1/`
+- Checkpoints are saved to `output/checkpoints/stage1/`
 
 ### Stage 2: Language Model Fine-tuning
 
@@ -153,7 +146,7 @@ bash run_train_stage2.sh \
     --num_epochs 2 \
     --lr 2e-5 \
     --save_interval 200 \
-    --stage1_checkpoint outputs/checkpoints/stage1/checkpoint_epoch_2
+    --stage1_checkpoint output/checkpoints/stage1/checkpoint_epoch_2
 ```
 
 **Key parameters**:
@@ -164,7 +157,7 @@ bash run_train_stage2.sh \
 - Freezes vision encoder and projection head (from Stage 1)
 - Fine-tunes language model using LoRA (default) or full fine-tuning
 - Uses language modeling loss for answer generation
-- Checkpoints are saved to `outputs/checkpoints/stage2/`
+- Checkpoints are saved to `output/checkpoints/stage2/`
 
 ## Evaluation
 
@@ -176,8 +169,8 @@ The evaluation script supports two modes:
 
 ```bash
 bash run_evaluate.sh \
-    --checkpoint outputs/checkpoints/stage2/checkpoint_step_16000 \
-    --stage1_checkpoint outputs/checkpoints/stage1/checkpoint_epoch_2 \
+    --checkpoint output/checkpoints/stage2/checkpoint_step_16000 \
+    --stage1_checkpoint output/checkpoints/stage1/checkpoint_epoch_2 \
     --dataset gsm8k \
     --split test
 ```
@@ -304,10 +297,13 @@ RoT/
 │   ├── convert_to_safetensors.py    # Convert DeepSpeed → SafeTensors
 │   └── convert_from_safetensors.py # Convert SafeTensors → DeepSpeed
 ├── data/                    # Data directory
-├── ckpt/                    # Model checkpoints
-│   ├── base/               # Base model checkpoints
-│   ├── stage1/             # Stage 1 checkpoints
-│   └── stage2/             # Stage 2 checkpoints
+├── ckpt/                    # Pre-trained model checkpoints
+│   └── base/               # Base model (e.g., Qwen3-VL-4B-Instruct)
+├── output/                  # Training outputs
+│   ├── checkpoints/        # Model checkpoints
+│   │   ├── stage1/         # Stage 1 checkpoints
+│   │   └── stage2/         # Stage 2 checkpoints
+│   └── logs/               # Training logs
 ├── run_train_stage1.sh     # Stage 1 training script
 ├── run_train_stage2.sh     # Stage 2 training script
 ├── run_evaluate.sh         # Evaluation script
